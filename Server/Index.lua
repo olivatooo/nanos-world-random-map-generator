@@ -6,9 +6,41 @@ end
 
 
 function SpawnStaticMesh(location, rotation, asset, scale_factor)
-	local sm = StaticMesh(location, rotation, asset)
-	if scale_factor then
-		sm:SetScale(Vector(scale_factor, scale_factor, scale_factor))
+	Timer.SetTimeout(function()
+		local sm = StaticMesh(location, rotation, asset)
+		if scale_factor then
+			sm:SetScale(Vector(scale_factor, scale_factor, scale_factor))
+		end
+	end, math.random(1000))
+end
+
+
+function RotateVector(new_pivot_origin, angle, p)
+	local s = math.sin(angle)
+	local c = math.cos(angle)
+
+	-- translate point back to origin:
+	p.X = p.X - new_pivot_origin.X
+	p.Y = p.Y - new_pivot_origin.Y
+
+	-- rotate point
+	local xnew = p.X * c - p.Y * s
+	local ynew = p.X * s + p.Y * c
+
+	-- translate point back:
+	p.X = xnew + new_pivot_origin.X
+	p.Y = ynew + new_pivot_origin.Y
+	return Vector(p.X, p.Y, 0)
+end
+
+
+function MirrorMap()
+	local origin_point = ORIGIN_POINT + Vector(math.random(10000),math.random(10000), math.random(1000))
+	local angle = 180
+	for _,v in pairs(StaticMesh.GetAll()) do
+		local new_pos = RotateVector(origin_point, angle, v:GetLocation())
+		new_pos = v:GetLocation()
+		SpawnStaticMesh(new_pos + Vector(1000,1000, math.random(10)), Rotator(), v:GetMesh())
 	end
 end
 
@@ -20,6 +52,7 @@ function GenerateStructures()
 		origin_point = ORIGIN_POINT
 		for i=1,MAP_SIZE do
 			local rotation = Rotator()
+			table.insert(SPAWN_LOCATIONS, origin_point + Vector(0,0, 300))
 			SpawnStaticMesh(origin_point, Rotator(), BASE_SM)
 			if math.random(100) > 100 - STRUCTURE_CHANCE then
 				if math.random(100) > 100 - STRUCTURE_ROTATION_CHANCE then
@@ -56,13 +89,64 @@ function GenerateStructures()
 			end
 		end
 	end
+	Events.Call("MapLoaded", SPAWN_LOCATIONS)
 end
+Package.Export("GenerateMap", GenerateStructures)
 Events.Subscribe("GenerateMap", GenerateStructures)
 
 
-function ClearStructures()
+function ClearStructures(blend_out_time)
+	blend_out_time = true
 	for _, sm in pairs(StaticMesh.GetAll()) do
-		sm:Destroy()
+		if sm and sm:IsValid() then
+			if blend_out_time then
+				Timer.SetTimeout(function()
+					sm:Destroy()
+				end, math.random(1000))
+			else
+				sm:Destroy()
+			end
+		end
 	end
 end
-Events.Subscribe("ClearMap", ClearStructures)
+Package.Export("ClearMap", ClearStructures)
+
+
+Package.Export("SetMapSize", function(map_size)
+	MAP_SIZE = map_size
+end)
+
+
+Package.Export("SetNumberOfIterations", function(num_iterations)
+	NUMBER_OF_ITERATIONS = num_iterations
+end)
+
+
+Package.Export("SetZChance", function(z)
+	Z_CHANCE = z
+end)
+
+
+Package.Export("SetDetailsRotationChance", function(details_rotation_chance)
+	DETAILS_ROTATION_CHANCE = details_rotation_chance
+end)
+
+
+Package.Export("SetDetailsChance", function(details_chance)
+	DETAILS_CHANCE = details_chance
+end)
+
+
+Package.Export("SetStructureRotationChance", function(structure_chance)
+	STRUCTURE_ROTATION_CHANCE = structure_chance
+end)
+
+
+Package.Export("SetStructureChance", function(structure_chance)
+	STRUCTURE_CHANCE = structure_chance
+end)
+
+
+Package.Export("SetOriginPoint", function(origin_point)
+	ORIGIN_POINT = origin_point
+end)
