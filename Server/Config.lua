@@ -1,5 +1,5 @@
 -- Start generate location
-ORIGIN_POINT = Vector(100000, 0, 0)
+ORIGIN_POINT = Vector(100000, 0, 200)
 
 -- Base Static Mesh to use for floor
 BASE_SM = "nanos-world::SM_Wood_Platform_10"
@@ -34,4 +34,4 @@ DETAILS_LIST = {"SM_TrashCan_01", "SM_DumpsterTrash", "SM_Boxes_01", "SM_Boxes_0
 
 
 NUMBER_OF_ITERATIONS = 3
-MAP_SIZE = 75
+MAP_SIZE = 60

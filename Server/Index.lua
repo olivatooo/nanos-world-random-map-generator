@@ -23,6 +23,7 @@ function RotateVector(new_pivot_origin, angle, p)
 	p.X = p.X - new_pivot_origin.X
 	p.Y = p.Y - new_pivot_origin.Y
 
+
 	-- rotate point
 	local xnew = p.X * c - p.Y * s
 	local ynew = p.X * s + p.Y * c
@@ -47,18 +48,19 @@ end
 
 -- Simple random walk algorithm
 function GenerateStructures()
+	SPAWN_LOCATIONS = {}
 	local origin_point = ORIGIN_POINT
 	for k=1, NUMBER_OF_ITERATIONS do
 		origin_point = ORIGIN_POINT
 		for i=1,MAP_SIZE do
 			local rotation = Rotator()
 			table.insert(SPAWN_LOCATIONS, origin_point + Vector(0,0, 300))
-			SpawnStaticMesh(origin_point, Rotator(), BASE_SM)
+			SpawnStaticMesh(origin_point + Vector(0,0, RandomFloat(0, 10)), Rotator(), BASE_SM)
 			if math.random(100) > 100 - STRUCTURE_CHANCE then
 				if math.random(100) > 100 - STRUCTURE_ROTATION_CHANCE then
 					rotation = Rotator(0, math.random(180), 0)
 				end
-				SpawnStaticMesh(origin_point + Vector(0,0,10), rotation, "nanos-world::" .. STRUCTURE_LIST[math.random(#STRUCTURE_LIST)])
+				SpawnStaticMesh(origin_point + Vector(0,0, RandomFloat(0, 10)), rotation, "nanos-world::" .. STRUCTURE_LIST[math.random(#STRUCTURE_LIST)])
 			end
 
 			if math.random(100) > 100 - DETAILS_CHANCE then
@@ -110,9 +112,10 @@ function ClearStructures(blend_out_time)
 	end
 end
 Package.Export("ClearMap", ClearStructures)
+Events.Subscribe("ClearMap", ClearStructures)
 
 
-Package.Export("SetMapSize", function(map_size)
+Events.Subscribe("SetMapSize", function(map_size)
 	MAP_SIZE = map_size
 end)
 
