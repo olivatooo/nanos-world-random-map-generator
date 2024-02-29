@@ -44,7 +44,7 @@ end
 
 -- Simple random walk algorithm
 function GenerateStructures()
-  if math.random(100) > 90 then
+  if math.random(100) > 60 then
     Z_CHANCE = 2
   else
     Z_CHANCE = 0
@@ -100,14 +100,19 @@ end
 Package.Export("GenerateMap", GenerateStructures)
 Events.Subscribe("GenerateMap", GenerateStructures)
 
-
+Wiper = nil
 function ClearStructures(blend_out_time)
+  if Wiper ~= nil then
+    Timer.ClearInterval(Wiper)
+  end
   blend_out_time = true
   for _, sm in pairs(StaticMesh.GetAll()) do
     if sm and sm:IsValid() then
       if blend_out_time then
         Timer.SetTimeout(function()
-          sm:Destroy()
+          if sm and sm:IsValid() then
+            sm:Destroy()
+          end
         end, math.random(1000))
       else
         sm:Destroy()
@@ -121,8 +126,48 @@ function ClearStructures(blend_out_time)
   end
 end
 
+function Shuffle(tbl)
+  for i = #tbl, 2, -1 do
+    local j = math.random(i)
+    tbl[i], tbl[j] = tbl[j], tbl[i]
+  end
+  return tbl
+end
+
+function SlowlyClearStructures(delay)
+  local items = Shuffle(StaticMesh.GetAll())
+  local i = 1
+  Wiper = Timer.SetInterval(function()
+    local sm = items[i]
+    if sm and sm:IsValid() then
+      local marked = sm:GetValue("Marked") or 1
+      sm:SetValue("Marked", marked + 1)
+      if marked == 2 then
+        sm:SetMaterialColorParameter("Tint", Color.WHITE * 4)
+      elseif marked == 3 then
+        sm:SetMaterialColorParameter("Tint", Color(0.4 * marked, 0, 0))
+      end
+      if marked > 3 then
+        if math.random(100) > 50 then
+          local grenade = Grenade(sm:GetLocation(), Rotator(), "nanos-world::SM_Grenade_G67",
+            "nanos-world::P_Explosion_Dirt",
+            "nanos-world::A_Explosion_Large")
+          grenade:Explode()
+        end
+        sm:Destroy()
+      end
+    end
+    i = i + 1
+    if i > #items then
+      i = 1
+    end
+  end, delay)
+end
+
 Package.Export("ClearMap", ClearStructures)
 Events.Subscribe("ClearMap", ClearStructures)
+Package.Export("ClearMapSlowly", SlowlyClearStructures)
+Events.Subscribe("ClearMapSlowly", SlowlyClearStructures)
 
 
 Events.Subscribe("SetMapSize", function(map_size)
