@@ -142,12 +142,12 @@ function SlowlyClearStructures(delay)
     if sm and sm:IsValid() then
       local marked = sm:GetValue("Marked") or 1
       sm:SetValue("Marked", marked + 1)
-      if marked == 2 then
+      if marked == 1 then
         sm:SetMaterialColorParameter("Tint", Color.WHITE * 4)
-      elseif marked == 3 then
+      elseif marked == 2 then
         sm:SetMaterialColorParameter("Tint", Color(0.4 * marked, 0, 0))
       end
-      if marked > 3 then
+      if marked >= 3 then
         if math.random(100) > 50 then
           local grenade = Grenade(sm:GetLocation(), Rotator(), "nanos-world::SM_Grenade_G67",
             "nanos-world::P_Explosion_Dirt",
