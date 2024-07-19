@@ -1,0 +1,18 @@
+name: Upload Package
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  upload-package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Use deploy package action
+        uses: hypersonic-laboratories/deploy-package@main
+        with:
+          access_token: ${{ secrets.ACCESS_TOKEN }}
+          package_name: 'cool-package'
+
