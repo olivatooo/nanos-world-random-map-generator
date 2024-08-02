@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Use deploy package action
-        uses: hypersonic-laboratories/deploy-package@main
+      - name: Use deploy world action
+        uses: hypersonic-laboratories/deploy-world@main
         with:
           access_token: ${{ secrets.ACCESS_TOKEN }}
-          package_name: 'cool-package'
+          world_name: 'we7c5d4'
 
